@@ -1,7 +1,7 @@
 use std::io::{BufReader, Write};
 use std::net::{TcpListener, TcpStream};
 use crate::request::Request;
-use crate::handlers::{Response, route_request};
+use crate::routes::{Response, router};
 
 /// Runs the TCP server on the specified IP and port.
 pub fn run(ip: &str, port: u16) -> std::io::Result<()> {
@@ -29,7 +29,7 @@ fn handle_client(mut stream: TcpStream) -> std::io::Result<()> {
     let request = Request::parse(&mut reader)?;
     println!("Request: {:?}", request);
 
-    let response: Response = route_request(&request);
-    stream.write_all(response.as_bytes())?;
+    let response: Response = router(&request);
+    stream.write_all(response.format_response().as_bytes())?;
     Ok(())
 }

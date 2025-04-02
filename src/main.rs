@@ -1,6 +1,6 @@
 mod server;
 mod request;
-mod handlers;
+mod routes;
 
 fn main() -> std::io::Result<()> {
     let ip = "127.0.0.1";
