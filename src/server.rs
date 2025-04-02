@@ -1,11 +1,11 @@
 use std::io::{BufReader, Write};
 use std::net::{TcpListener, TcpStream};
 use crate::request::Request;
-use crate::handlers::Response;
+use crate::handlers::{Response, route_request};
 
-/// Runs the TCP server.
-pub fn run() -> std::io::Result<()> {
-    let address = "127.0.0.1:4221";
+/// Runs the TCP server on the specified IP and port.
+pub fn run(ip: &str, port: u16) -> std::io::Result<()> {
+    let address = format!("{}:{}", ip, port);
     println!("Server started on http://{}", address);
 
     let listener = TcpListener::bind(address)?;
@@ -29,7 +29,7 @@ fn handle_client(mut stream: TcpStream) -> std::io::Result<()> {
     let request = Request::parse(&mut reader)?;
     println!("Request: {:?}", request);
 
-    let response: Response = crate::handlers::route_request(&request);
+    let response: Response = route_request(&request);
     stream.write_all(response.as_bytes())?;
     Ok(())
 }
