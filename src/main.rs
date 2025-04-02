@@ -55,8 +55,7 @@ impl Request {
             header_line.clear();
         }
 
-        let mut body = String::new();
-        reader.read_to_string(&mut body).unwrap();
+        let body = String::from("");
 
         Request {
             request_line: request_line.trim().to_string(),
