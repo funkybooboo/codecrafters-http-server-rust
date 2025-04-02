@@ -24,6 +24,7 @@ impl Request {
 
         let headers = Self::parse_headers(reader)?;
         let body = String::new(); // For now, we're not handling the body.
+
         Ok(Request {
             method,
             path,

@@ -1,36 +1,6 @@
-use crate::request::Request;
 use std::collections::HashMap;
-
-/// HTTP Response struct.
-pub struct Response {
-    pub status_code: u16,
-    pub status_text: String,
-    pub headers: HashMap<String, String>,
-    pub body: String,
-}
-
-impl Response {
-    /// Creates a new empty Response with default values.
-    pub fn new() -> Self {
-        Self {
-            status_code: 200,
-            status_text: String::new(),
-            headers: HashMap::new(),
-            body: String::new(),
-        }
-    }
-
-    /// Converts the Response struct into a complete HTTP response string.
-    pub fn format_response(&self) -> String {
-        let mut response = format!("HTTP/1.1 {} {}\r\n", self.status_code, self.status_text);
-        for (header, value) in &self.headers {
-            response.push_str(&format!("{}: {}\r\n", header, value));
-        }
-        response.push_str("\r\n");
-        response.push_str(&self.body);
-        response
-    }
-}
+use crate::request::Request;
+use crate::response::Response;
 
 /// Unified route handler type.
 /// Each handler receives a mutable reference to the Request (which will have any
@@ -100,36 +70,9 @@ fn match_route(pattern: &str, path: &str) -> Option<HashMap<String, String>> {
     Some(params)
 }
 
-// ------------------- Example Handlers -------------------
-
-/// Handler for the root route (static).
-fn root_route(_req: &mut Request, res: &mut Response) {
-    res.status_code = 200;
-    res.status_text = "OK".to_string();
-}
-
-/// Handler for the echo route (dynamic).
-/// Expects the pattern "/echo/{msg}" so that "msg" is extracted into req.params.
-fn echo_route(req: &mut Request, res: &mut Response) {
-    let msg = req.params.get("msg").expect("Expected parameter 'msg'");
-    res.status_code = 200;
-    res.status_text = "OK".to_string();
-    res.headers.insert("Content-Type".to_string(), "text/plain".to_string());
-    res.headers.insert("Content-Length".to_string(), msg.len().to_string());
-    res.body = msg.clone();
-}
-
 /// Default handler for unmatched routes.
-fn not_found_route(_req: &mut Request, res: &mut Response) {
+pub fn not_found_route(_req: &mut Request, res: &mut Response) {
     res.status_code = 404;
     res.status_text = "Not Found".to_string();
     res.body = "The requested resource was not found.".to_string();
-}
-
-/// Convenience function to create a router with pre-registered routes.
-pub fn create_router() -> Router {
-    let mut router = Router::new();
-    router.register("/", root_route);
-    router.register("/echo/{msg}", echo_route);
-    router
 }

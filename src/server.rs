@@ -1,10 +1,11 @@
 use std::io::{BufReader, Write};
 use std::net::{TcpListener, TcpStream};
 use crate::request::Request;
-use crate::router::{Response, create_router};
+use crate::response::Response;
+use crate::router::Router;
 
 /// Runs the TCP server on the specified IP and port.
-pub fn run(ip: &str, port: u16) -> std::io::Result<()> {
+pub fn run(ip: &str, port: u16, router: Router) -> std::io::Result<()> {
     let address = format!("{}:{}", ip, port);
     println!("Server started on http://{}", address);
 
@@ -14,7 +15,7 @@ pub fn run(ip: &str, port: u16) -> std::io::Result<()> {
         match stream {
             Ok(stream) => {
                 println!("Accepted new connection");
-                if let Err(e) = handle_client(stream) {
+                if let Err(e) = handle_client(stream, &router) {
                     eprintln!("Error handling connection: {}", e);
                 }
             }
@@ -24,12 +25,11 @@ pub fn run(ip: &str, port: u16) -> std::io::Result<()> {
     Ok(())
 }
 
-fn handle_client(mut stream: TcpStream) -> std::io::Result<()> {
+fn handle_client(mut stream: TcpStream, router: &Router) -> std::io::Result<()> {
     let mut reader = BufReader::new(&mut stream);
     let mut request = Request::parse(&mut reader)?;
     println!("Request: {:?}", request);
 
-    let router = create_router();
     let response: Response = router.route(&mut request);
     stream.write_all(response.format_response().as_bytes())?;
     Ok(())
