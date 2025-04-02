@@ -12,7 +12,6 @@ pub struct Request {
 }
 
 impl Request {
-    /// Parses an HTTP request from the given buffered reader.
     pub fn parse<R: BufRead>(reader: &mut R) -> std::io::Result<Self> {
         let mut request_line = String::new();
         reader.read_line(&mut request_line)?;
@@ -31,7 +30,7 @@ impl Request {
             http_version,
             headers,
             body,
-            params: HashMap::new(), // Initialize as empty.
+            params: HashMap::new(),
         })
     }
 

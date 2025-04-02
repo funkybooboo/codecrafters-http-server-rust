@@ -4,7 +4,6 @@ use crate::request::Request;
 use crate::response::Response;
 use crate::router::Router;
 
-/// Runs the TCP server on the specified IP and port.
 pub fn run(ip: &str, port: u16, router: Router) -> std::io::Result<()> {
     let address = format!("{}:{}", ip, port);
     println!("Server started on http://{}", address);

@@ -1,5 +1,5 @@
 use crate::router::Router;
-use crate::routes::{echo_route, root_route};
+use crate::routes::{echo_route, root_route, user_agent_route};
 
 mod server;
 mod request;
@@ -14,6 +14,7 @@ fn main() -> std::io::Result<()> {
     let mut router = Router::new();
     router.register("/", root_route);
     router.register("/echo/{msg}", echo_route);
+    router.register("/user-agent", user_agent_route);
 
     server::run(ip, port, router)
 }

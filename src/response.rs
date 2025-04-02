@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-/// HTTP Response struct.
 pub struct Response {
     pub http_version: String,
     pub status_code: u16,
@@ -10,7 +9,6 @@ pub struct Response {
 }
 
 impl Response {
-    /// Creates a new empty Response with default values.
     pub fn new() -> Self {
         Self {
             http_version: "HTTP/1.1".to_string(),
@@ -21,7 +19,6 @@ impl Response {
         }
     }
 
-    /// Converts the Response struct into a complete HTTP response string.
     pub fn format_response(&self) -> String {
         let mut response = format!("{} {} {}\r\n", self.http_version, self.status_code, self.status_text);
         for (header, value) in &self.headers {
