@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::io::Error;
 use crate::request::Request;
 use crate::response::Response;
 
@@ -74,7 +75,7 @@ pub fn not_found_route(_req: &mut Request, res: &mut Response) {
     res.body = "The requested resource was not found.".to_string();
 }
 
-pub fn make_interval_server_error_route(e: Err) -> Route {
+pub fn make_interval_server_error_route(e: Error) -> Route {
     Box::new(move |req: &mut Request, res: &mut Response| {
         res.status_code = 500;
         res.status_text = "Internal Server Error".to_string();
