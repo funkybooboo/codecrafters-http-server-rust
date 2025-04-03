@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use crate::request::Request;
 use crate::response::Response;
 
-pub type Route = Box<dyn for<'a, 'b> Fn(&'a mut Request, &'b mut Response) + Send + 'static>;
+pub type Route = Box<dyn for<'a, 'b> Fn(&'a mut Request, &'b mut Response) + Send + Sync + 'static>;
 
 pub struct Router {
     routes: HashMap<String, Route>,
@@ -13,12 +13,14 @@ impl Router {
     pub fn new() -> Self {
         Self {
             routes: HashMap::new(),
+            // Box the default route so it matches the `Route` type.
             default_route: Box::new(not_found_route),
         }
     }
 
-    pub fn register(&mut self, pattern: &str, route: fn(&mut Request, &mut Response)) {
-        self.routes.insert(pattern.to_string(), Box::new(route));
+    // Change the parameter type from a function pointer to a boxed Route.
+    pub fn register(&mut self, pattern: &str, route: Route) {
+        self.routes.insert(pattern.to_string(), route);
     }
 
     pub fn route(&self, request: &mut Request) -> Response {
