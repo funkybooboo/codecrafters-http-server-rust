@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+#[derive(Debug)]
 pub struct Response {
     pub http_version: String,
     pub status_code: u16,

@@ -35,7 +35,17 @@ fn handle_connection(mut stream: TcpStream, router: &Router) -> std::io::Result<
     let mut request = Request::parse(&mut reader)?;
     println!("Request: {:?}", request);
 
-    let response: Response = router.route(&mut request);
+    let mut response: Response = router.route(&mut request);
+    println!("Response: {:?}", response);
+
+    if let Some(accept_encoding) = request.headers.get("Accept-Encoding") {
+        // Check if the value contains "gzip" (you can extend this for comma-separated values later)
+        if accept_encoding.split(',').map(|s| s.trim()).any(|enc| enc == "gzip") {
+            // Only add Content-Encoding if gzip is supported.
+            response.headers.insert("Content-Encoding".to_string(), "gzip".to_string());
+        }
+    }
+
     stream.write_all(response.format_response().as_bytes())?;
     Ok(())
 }
