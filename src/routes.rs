@@ -27,7 +27,7 @@ pub fn user_agent_route(req: &mut Request, res: &mut Response) {
     res.body = user_agent.clone();
 }
 
-pub fn make_file_route(directory: String) -> impl Fn(&mut Request, &mut Response) {
+pub fn make_file_route(directory: String) -> impl for<'a, 'b> Fn(&'a mut Request, &'b mut Response) + Send + 'static {
     move |req: &mut Request, res: &mut Response| {
         let filename = req.params.get("filename").expect("Expected parameter 'filename'");
 
