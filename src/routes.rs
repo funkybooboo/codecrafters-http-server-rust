@@ -28,7 +28,7 @@ pub fn user_agent_route(req: &mut Request, res: &mut Response) {
     res.body = user_agent.clone();
 }
 
-pub fn make_get_file_route(directory: String) -> Route {
+pub fn make_get_file_route(directory: &String) -> Route {
     Box::new(move |req: &mut Request, res: &mut Response| {
         let filename = req.params.get("filename").expect("Expected parameter 'filename'");
 
@@ -54,7 +54,7 @@ pub fn make_get_file_route(directory: String) -> Route {
     })
 }
 
-pub fn make_post_file_route(directory: String) -> Route {
+pub fn make_post_file_route(directory: &String) -> Route {
     Box::new(move |req: &mut Request, res: &mut Response| {
         let filename = req.params.get("filename").expect("Expected parameter 'filename'");
 
