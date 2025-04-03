@@ -51,12 +51,7 @@ fn handle_connection(mut stream: TcpStream, router: &Router) -> std::io::Result<
 
             response.headers.insert("Content-Encoding".to_string(), "gzip".to_string());
             response.headers.insert("Content-Length".to_string(), compressed_body.len().to_string());
-            let hex_string = compressed_body
-                .iter()
-                .map(|b| format!("{:02X}", b))
-                .collect::<Vec<_>>()
-                .join(" ");
-            response.body = hex_string;
+            response.body = compressed_body;
         }
     }
 

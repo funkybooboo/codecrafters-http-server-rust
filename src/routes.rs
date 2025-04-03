@@ -8,6 +8,7 @@ use crate::router::not_found_route;
 pub fn root_route(_req: &mut Request, res: &mut Response) {
     res.status_code = 200;
     res.status_text = "OK".to_string();
+    res.body = Vec::new();
 }
 
 pub fn echo_route(req: &mut Request, res: &mut Response) {
@@ -15,8 +16,8 @@ pub fn echo_route(req: &mut Request, res: &mut Response) {
     res.status_code = 200;
     res.status_text = "OK".to_string();
     res.headers.insert("Content-Type".to_string(), "text/plain".to_string());
-    res.headers.insert("Content-Length".to_string(), msg.len().to_string());
-    res.body = msg.clone();
+    res.headers.insert("Content-Length".to_string(), msg.as_bytes().len().to_string());
+    res.body = msg.as_bytes().to_vec();
 }
 
 pub fn user_agent_route(req: &mut Request, res: &mut Response) {
@@ -24,14 +25,13 @@ pub fn user_agent_route(req: &mut Request, res: &mut Response) {
     res.status_code = 200;
     res.status_text = "OK".to_string();
     res.headers.insert("Content-Type".to_string(), "text/plain".to_string());
-    res.headers.insert("Content-Length".to_string(), user_agent.len().to_string());
-    res.body = user_agent.clone();
+    res.headers.insert("Content-Length".to_string(), user_agent.as_bytes().len().to_string());
+    res.body = user_agent.as_bytes().to_vec();
 }
 
 pub fn make_get_file_route(directory: String) -> Route {
     Box::new(move |req: &mut Request, res: &mut Response| {
         let filename = req.params.get("filename").expect("Expected parameter 'filename'");
-
         let file_path: PathBuf = Path::new(&directory).join(filename);
 
         if !file_path.exists() {
@@ -45,7 +45,7 @@ pub fn make_get_file_route(directory: String) -> Route {
                 res.status_text = "OK".to_string();
                 res.headers.insert("Content-Type".to_string(), "application/octet-stream".to_string());
                 res.headers.insert("Content-Length".to_string(), contents.len().to_string());
-                res.body = String::from_utf8_lossy(&contents).into_owned();
+                res.body = contents;
             },
             Err(_) => {
                 not_found_route(req, res);
@@ -57,9 +57,7 @@ pub fn make_get_file_route(directory: String) -> Route {
 pub fn make_post_file_route(directory: String) -> Route {
     Box::new(move |req: &mut Request, res: &mut Response| {
         let filename = req.params.get("filename").expect("Expected parameter 'filename'");
-
         let file_path = Path::new(&directory).join(filename);
-
         let content = req.body.clone();
 
         match fs::write(&file_path, content) {

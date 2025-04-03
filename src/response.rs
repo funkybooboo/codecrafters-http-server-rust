@@ -6,7 +6,7 @@ pub struct Response {
     pub status_code: u16,
     pub status_text: String,
     pub headers: HashMap<String, String>,
-    pub body: String,
+    pub body: Vec<u8>,
 }
 
 impl Response {
@@ -14,19 +14,21 @@ impl Response {
         Self {
             http_version: "HTTP/1.1".to_string(),
             status_code: 200,
-            status_text: String::new(),
+            status_text: "OK".to_string(),
             headers: HashMap::new(),
-            body: String::new(),
+            body: Vec::new(),
         }
     }
 
-    pub fn format_response(&self) -> String {
+    pub fn format_response(&self) -> Vec<u8> {
         let mut response = format!("{} {} {}\r\n", self.http_version, self.status_code, self.status_text);
         for (header, value) in &self.headers {
             response.push_str(&format!("{}: {}\r\n", header, value));
         }
         response.push_str("\r\n");
-        response.push_str(&self.body);
-        response
+
+        let mut response_bytes = response.into_bytes();
+        response_bytes.extend_from_slice(&self.body);
+        response_bytes
     }
 }
