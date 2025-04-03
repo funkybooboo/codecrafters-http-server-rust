@@ -37,7 +37,7 @@ fn main() -> std::io::Result<()> {
         make_get_file_route(&directory),
     );
     router.register(
-        "GET",
+        "POST",
         "/files/{filename}",
         make_post_file_route(&directory),
     );
