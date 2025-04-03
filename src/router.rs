@@ -74,8 +74,8 @@ pub fn not_found_route(_req: &mut Request, res: &mut Response) {
     res.status_text = "Not Found".to_string();
     let message = "The requested resource was not found.";
     res.headers.insert("Content-Type".to_string(), "text/plain".to_string());
-    res.headers.insert("Content-Length".to_string(), message.len().to_string());
-    res.body = message.into_bytes();
+    res.headers.insert("Content-Length".to_string(), message.as_bytes().len().to_string());
+    res.body = message.as_bytes().to_vec();
 }
 
 pub fn make_interval_server_error_route(e: Error) -> Route {
@@ -84,7 +84,7 @@ pub fn make_interval_server_error_route(e: Error) -> Route {
         res.status_text = "Internal Server Error".to_string();
         let error_message = format!("Error: {}", e);
         res.headers.insert("Content-Type".to_string(), "text/plain".to_string());
-        res.headers.insert("Content-Length".to_string(), error_message.len().to_string());
-        res.body = error_message.into_bytes();
+        res.headers.insert("Content-Length".to_string(), error_message.as_bytes().len().to_string());
+        res.body = error_message.as_bytes().to_vec();
     })
 }
