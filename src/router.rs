@@ -76,7 +76,7 @@ pub fn not_found_route(_req: &mut Request, res: &mut Response) {
 }
 
 pub fn make_interval_server_error_route(e: Error) -> Route {
-    Box::new(move |req: &mut Request, res: &mut Response| {
+    Box::new(move |_req: &mut Request, res: &mut Response| {
         res.status_code = 500;
         res.status_text = "Internal Server Error".to_string();
         res.body = format!("Error: {}", e)
