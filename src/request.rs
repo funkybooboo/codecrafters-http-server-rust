@@ -1,4 +1,4 @@
-use std::io::BufRead;
+use std::io::{self, BufRead};
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -12,7 +12,7 @@ pub struct Request {
 }
 
 impl Request {
-    pub fn parse<R: BufRead>(reader: &mut R) -> std::io::Result<Self> {
+    pub fn parse<R: BufRead>(reader: &mut R) -> io::Result<Self> {
         let mut request_line = String::new();
         reader.read_line(&mut request_line)?;
         let request_line = request_line.trim_end();
@@ -22,7 +22,7 @@ impl Request {
         let http_version = parts.next().unwrap_or("").to_string();
 
         let headers = Self::parse_headers(reader)?;
-        let body = String::new(); // For now, we're not handling the body.
+        let body = Self::parse_body(reader, &headers)?;
 
         Ok(Request {
             method,
@@ -34,7 +34,7 @@ impl Request {
         })
     }
 
-    fn parse_headers<R: BufRead>(reader: &mut R) -> std::io::Result<HashMap<String, String>> {
+    fn parse_headers<R: BufRead>(reader: &mut R) -> io::Result<HashMap<String, String>> {
         let mut headers = HashMap::new();
         loop {
             let mut line = String::new();
@@ -47,5 +47,18 @@ impl Request {
             }
         }
         Ok(headers)
+    }
+
+    fn parse_body<R: BufRead>(reader: &mut R, headers: &HashMap<String, String>) -> io::Result<String> {
+        if let Some(cl_val) = headers.get("Content-Length") {
+            if let Ok(content_length) = cl_val.parse::<usize>() {
+                let mut body_buffer = vec![0; content_length];
+                reader.read_exact(&mut body_buffer)?;
+                return String::from_utf8(body_buffer).map_err(|e| {
+                    io::Error::new(io::ErrorKind::InvalidData, format!("UTF-8 error: {}", e))
+                });
+            }
+        }
+        Ok(String::new())
     }
 }
