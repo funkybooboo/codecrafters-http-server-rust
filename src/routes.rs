@@ -65,7 +65,7 @@ pub fn make_post_file_route(directory: String) -> Route {
         match fs::write(&file_path, content) {
             Ok(_) => {
                 res.status_code = 201;
-                res.body = "Created".to_string();
+                res.status_text = "Created".to_string();
             },
             Err(e) => {
                 make_interval_server_error_route(e)(req, res);
