@@ -56,7 +56,7 @@ fn match_route(pattern: &str, path: &str) -> Option<HashMap<String, String>> {
     Some(params)
 }
 
-fn not_found_route(_req: &mut Request, res: &mut Response) {
+pub fn not_found_route(_req: &mut Request, res: &mut Response) {
     res.status_code = 404;
     res.status_text = "Not Found".to_string();
     res.body = "The requested resource was not found.".to_string();
