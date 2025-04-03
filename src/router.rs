@@ -72,13 +72,19 @@ fn match_route(pattern: &str, path: &str) -> Option<HashMap<String, String>> {
 pub fn not_found_route(_req: &mut Request, res: &mut Response) {
     res.status_code = 404;
     res.status_text = "Not Found".to_string();
-    res.body = "The requested resource was not found.".to_string();
+    let message = "The requested resource was not found.";
+    res.headers.insert("Content-Type".to_string(), "text/plain".to_string());
+    res.headers.insert("Content-Length".to_string(), message.len().to_string());
+    res.body = message.into_bytes();
 }
 
 pub fn make_interval_server_error_route(e: Error) -> Route {
     Box::new(move |_req: &mut Request, res: &mut Response| {
         res.status_code = 500;
         res.status_text = "Internal Server Error".to_string();
-        res.body = format!("Error: {}", e)
+        let error_message = format!("Error: {}", e);
+        res.headers.insert("Content-Type".to_string(), "text/plain".to_string());
+        res.headers.insert("Content-Length".to_string(), error_message.len().to_string());
+        res.body = error_message.into_bytes();
     })
 }
