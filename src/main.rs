@@ -34,12 +34,12 @@ fn main() -> std::io::Result<()> {
     router.register(
         "GET",
         "/files/{filename}",
-        make_get_file_route(&directory),
+        make_get_file_route(directory.clone()),
     );
     router.register(
         "POST",
         "/files/{filename}",
-        make_post_file_route(&directory),
+        make_post_file_route(directory.clone()),
     );
 
     server::run(ip, port, router)
