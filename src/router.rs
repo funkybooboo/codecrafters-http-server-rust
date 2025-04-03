@@ -4,33 +4,43 @@ use crate::response::Response;
 
 pub type Route = Box<dyn for<'a, 'b> Fn(&'a mut Request, &'b mut Response) + Send + Sync + 'static>;
 
+pub struct RouteEntry {
+    pub method: String,
+    pub pattern: String,
+    pub handler: Route,
+}
+
 pub struct Router {
-    routes: HashMap<String, Route>,
-    default_route: Route,
+    pub routes: Vec<RouteEntry>,
+    pub default_route: Route,
 }
 
 impl Router {
     pub fn new() -> Self {
         Self {
-            routes: HashMap::new(),
-            // Box the default route so it matches the `Route` type.
+            routes: Vec::new(),
             default_route: Box::new(not_found_route),
         }
     }
 
-    // Change the parameter type from a function pointer to a boxed Route.
-    pub fn register(&mut self, pattern: &str, route: Route) {
-        self.routes.insert(pattern.to_string(), route);
+    /// Registers a new route with its method and pattern.
+    pub fn register(&mut self, method: &str, pattern: &str, handler: Route) {
+        self.routes.push(RouteEntry {
+            method: method.to_string(),
+            pattern: pattern.to_string(),
+            handler,
+        });
     }
 
     pub fn route(&self, request: &mut Request) -> Response {
         let mut response = Response::new();
-
-        for (pattern, route) in &self.routes {
-            if let Some(params) = match_route(pattern, &request.path) {
-                request.params = params;
-                route(request, &mut response);
-                return response;
+        for entry in &self.routes {
+            if entry.method.eq_ignore_ascii_case(&request.method) {
+                if let Some(params) = match_route(&entry.pattern, &request.path) {
+                    request.params = params;
+                    (entry.handler)(request, &mut response);
+                    return response;
+                }
             }
         }
         (self.default_route)(request, &mut response);
@@ -62,4 +72,12 @@ pub fn not_found_route(_req: &mut Request, res: &mut Response) {
     res.status_code = 404;
     res.status_text = "Not Found".to_string();
     res.body = "The requested resource was not found.".to_string();
+}
+
+pub fn make_interval_server_error_route(e: Err) -> Route {
+    Box::new(move |req: &mut Request, res: &mut Response| {
+        res.status_code = 500;
+        res.status_text = "Internal Server Error".to_string();
+        res.body = format!("Error: {}", e)
+    })
 }

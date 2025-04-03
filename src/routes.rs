@@ -1,5 +1,6 @@
 use crate::request::Request;
 use crate::response::Response;
+use crate::router::{make_interval_server_error_route, Route};
 use std::fs;
 use std::path::{Path, PathBuf};
 use crate::router::not_found_route;
@@ -27,20 +28,17 @@ pub fn user_agent_route(req: &mut Request, res: &mut Response) {
     res.body = user_agent.clone();
 }
 
-pub fn make_file_route(directory: String) -> impl for<'a, 'b> Fn(&'a mut Request, &'b mut Response) + Send + 'static {
-    move |req: &mut Request, res: &mut Response| {
+pub fn make_get_file_route(directory: String) -> Route {
+    Box::new(move |req: &mut Request, res: &mut Response| {
         let filename = req.params.get("filename").expect("Expected parameter 'filename'");
 
-        // Build the full file path.
         let file_path: PathBuf = Path::new(&directory).join(filename);
 
-        // Check if the file exists.
         if !file_path.exists() {
             not_found_route(req, res);
             return;
         }
 
-        // Attempt to read the file contents.
         match fs::read(&file_path) {
             Ok(contents) => {
                 res.status_code = 200;
@@ -53,5 +51,25 @@ pub fn make_file_route(directory: String) -> impl for<'a, 'b> Fn(&'a mut Request
                 not_found_route(req, res);
             }
         }
-    }
+    })
+}
+
+pub fn make_post_file_route(directory: String) -> Route {
+    Box::new(move |req: &mut Request, res: &mut Response| {
+        let filename = req.params.get("filename").expect("Expected parameter 'filename'");
+
+        let file_path = Path::new(&directory).join(filename);
+
+        let content = req.body.clone();
+
+        match fs::write(&file_path, content) {
+            Ok(_) => {
+                res.status_code = 201;
+                res.body = "Created".to_string();
+            },
+            Err(e) => {
+                make_interval_server_error_route(e)(req, res);
+            }
+        }
+    })
 }

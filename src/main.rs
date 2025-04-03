@@ -1,5 +1,5 @@
 use crate::router::Router;
-use crate::routes::{echo_route, make_file_route, root_route, user_agent_route};
+use crate::routes::{echo_route, make_get_file_route, root_route, user_agent_route};
 use std::env;
 
 mod server;
@@ -26,13 +26,20 @@ fn main() -> std::io::Result<()> {
     let port = 4221;
 
     let mut router = Router::new();
-    // Box each route to match the expected `Route` type.
-    router.register("/", Box::new(root_route));
-    router.register("/echo/{msg}", Box::new(echo_route));
-    router.register("/user-agent", Box::new(user_agent_route));
-    router.register("/files/{filename}", Box::new(make_file_route(
-        directory.as_deref().unwrap_or("/tmp/").to_string()
-    )));
+    // Register routes with their methods.
+    router.register("GET", "/", Box::new(root_route));
+    router.register("GET", "/echo/{msg}", Box::new(echo_route));
+    router.register("GET", "/user-agent", Box::new(user_agent_route));
+    router.register(
+        "GET",
+        "/files/{filename}",
+        make_get_file_route(directory.as_deref().unwrap_or("/tmp/").to_string()),
+    );
+    router.register(
+        "GET",
+        "/files/{filename}",
+        make_post_file_route(directory.as_deref().unwrap_or("/tmp/").to_string()),
+    );
 
     server::run(ip, port, router)
 }
